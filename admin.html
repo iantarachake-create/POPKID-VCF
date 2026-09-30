@@ -1,0 +1,123 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin</title>
+<link rel="stylesheet" href="style.css"></head><body>
+<div class="wrap" style="max-width:1000px">
+<div id="login" class="glass hidden" style="max-width:420px;margin:60px auto"><h1 style="font-size:2rem">Admin</h1>
+<label>Email</label><input id="em" type="email" autocomplete="username">
+<label>Password</label><input id="pw" type="password" autocomplete="current-password">
+<button class="btn" id="si">SIGN IN</button></div>
+
+<div id="app" class="hidden">
+<div class="row" style="align-items:center"><h1 style="font-size:1.8rem">Dashboard</h1><button class="btn ghost sm" id="out" style="flex:0">Logout</button></div>
+<div class="tabs"><button class="btn sm" data-t="c">Contacts</button><button class="btn sm ghost" data-t="a">Analytics</button><button class="btn sm ghost" data-t="s">Settings</button></div>
+<div class="stats" id="stats"></div>
+
+<section id="t-c" class="glass">
+ <div class="row" style="flex-wrap:wrap"><input id="q" placeholder="Search name, number, country"><select id="fc"><option value="">All countries</option></select><select id="fs"><option value="">Any status</option><option>active</option></select><input id="fd" type="date"></div>
+ <div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="btn sm gold" id="exA">Export VCF (filtered)</button><button class="btn sm gold" id="exS">Export selected</button><button class="btn sm" id="del">Delete selected</button></div>
+ <p id="prog" style="margin:10px 0;color:var(--gold)"></p>
+ <div class="scroll"><table><thead><tr><th><input type="checkbox" id="all" style="width:auto;min-height:0"></th><th>Name</th><th>Country</th><th>Code</th><th>WhatsApp</th><th>Added</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+ <p id="empty" class="center sub hidden"></p><button class="btn ghost sm" id="more" style="margin:14px auto 0">Load more</button>
+</section>
+
+<section id="t-a" class="glass hidden"><h3>Contacts by country</h3><div id="byc"></div><h3 style="margin-top:18px">Last 14 days</h3><div id="trend"></div></section>
+
+<section id="t-s" class="glass hidden">
+ <label>Website Name</label><input id="sn">
+ <label>Registration</label><select id="se"><option value="1">Enabled</option><option value="0">Disabled</option></select>
+ <label>Maintenance Mode</label><select id="sm"><option value="0">Off</option><option value="1">On</option></select>
+ <label>VCF Contact Limit (100, 250, 500, 1000, 2000 or custom)</label><input id="sv" type="number" min="1">
+ <button class="btn" id="ss">SAVE SETTINGS</button>
+</section></div></div>
+<dialog id="dlg"><p id="dm"></p><div class="row" style="margin-top:16px"><button class="btn ghost sm" id="dn">Cancel</button><button class="btn sm" id="dy">Delete</button></div></dialog>
+
+<script type="module">
+import {auth,db,toast} from "./firebase.js";
+import {signInWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {ref,get,set,update,query,orderByChild} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const ADMIN_EMAIL="iantaracha@gmail.com",$=id=>document.getElementById(id),PAGE=50;
+let all=[],view=[],shown=0,sel=new Set(),vcfLimit=500;
+const fmt=t=>new Date(t).toLocaleDateString();
+function pretty(c){return c.countryCode+" "+c.phone.slice(c.countryCode.length-1)}
+
+onAuthStateChanged(auth,u=>{
+ if(u&&u.email===ADMIN_EMAIL){$("login").classList.add("hidden");$("app").classList.remove("hidden");load()}
+ else{if(u){signOut(auth);toast("Unauthorized account.")}$("app").classList.add("hidden");$("login").classList.remove("hidden")}
+});
+$("si").onclick=async()=>{$("si").textContent="Signing in...";
+ try{await signInWithEmailAndPassword(auth,$("em").value.trim(),$("pw").value)}catch(e){toast("Invalid email or password.")}
+ $("si").textContent="SIGN IN"};
+$("out").onclick=()=>signOut(auth);
+
+async function load(){
+ try{
+  const snap=await get(query(ref(db,"contacts"),orderByChild("createdAt")));
+  all=[];snap.forEach(s=>{all.push({key:s.key,...s.val()})});all.reverse();
+  const s=(await get(ref(db,"settings/public"))).val()||{},p=(await get(ref(db,"settings/private"))).val()||{};
+  $("sn").value=s.siteName||"";$("se").value=s.registrationEnabled===false?"0":"1";$("sm").value=s.maintenance?"1":"0";
+  vcfLimit=p.vcfLimit||500;$("sv").value=vcfLimit;
+  const cs=[...new Set(all.map(c=>c.country))].sort();$("fc").innerHTML='<option value="">All countries</option>'+cs.map(c=>`<option>${c.replace(/</g,"&lt;")}</option>`).join("");
+  stats();filter();
+ }catch(e){toast("Could not load data. Check database rules and admin UID.")}
+}
+function stats(){
+ const now=new Date(),d0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(),wk=d0-((now.getDay()+6)%7)*864e5,mo=new Date(now.getFullYear(),now.getMonth(),1).getTime();
+ const n=t=>all.filter(c=>c.createdAt>=t).length;
+ $("stats").innerHTML="";
+ [["TOTAL CONTACTS",all.length],["TODAY",n(d0)],["THIS WEEK",n(wk)],["THIS MONTH",n(mo)],["COUNTRIES",new Set(all.map(c=>c.country)).size]].forEach(([k,v])=>{
+  const d=document.createElement("div");d.className="glass stat";d.innerHTML=`<b>0</b><span>${k}</span>`;$("stats").appendChild(d);
+  let i=0;const b=d.firstChild,st=Math.max(1,Math.ceil(v/25));const t=setInterval(()=>{i=Math.min(v,i+st);b.textContent=i;if(i>=v)clearInterval(t)},30)});
+ const cnt={};all.forEach(c=>cnt[c.country]=(cnt[c.country]||0)+1);
+ const bar=(l,v,m)=>{const d=document.createElement("div");d.style.cssText="margin:6px 0";d.innerHTML=`<small></small><div style="height:10px;border-radius:9px;background:linear-gradient(90deg,var(--red),var(--gold));width:${Math.max(3,v/m*100)}%"></div>`;d.firstChild.textContent=`${l} — ${v}`;return d};
+ $("byc").innerHTML="";const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,15);top.forEach(([k,v])=>$("byc").appendChild(bar(k,v,top[0][1])));
+ $("trend").innerHTML="";const days=[...Array(14)].map((_,i)=>d0-(13-i)*864e5),vals=days.map(t=>all.filter(c=>c.createdAt>=t&&c.createdAt<t+864e5).length),mx=Math.max(1,...vals);
+ days.forEach((t,i)=>$("trend").appendChild(bar(fmt(t),vals[i],mx)));
+}
+function filter(){
+ const q=$("q").value.toLowerCase().trim(),fc=$("fc").value,fs=$("fs").value,fd=$("fd").value;
+ view=all.filter(c=>(!q||c.name.toLowerCase().includes(q)||c.phone.includes(q.replace(/\D/g,"")||"\0")||c.country.toLowerCase().includes(q))&&(!fc||c.country===fc)&&(!fs||c.status===fs)&&(!fd||new Date(c.createdAt).toLocaleDateString("en-CA")===fd));
+ shown=0;$("rows").innerHTML="";more();
+ $("empty").classList.toggle("hidden",!!view.length);$("empty").textContent=all.length?"No contacts match your search.":"No contacts registered yet.";
+}
+function more(){
+ view.slice(shown,shown+PAGE).forEach(c=>{const tr=document.createElement("tr");
+  [null,c.name,c.country,c.countryCode,pretty(c),fmt(c.createdAt),c.status].forEach((v,i)=>{const td=document.createElement("td");
+   if(i===0){const cb=document.createElement("input");cb.type="checkbox";cb.style.cssText="width:auto;min-height:0";cb.checked=sel.has(c.key);cb.onchange=()=>cb.checked?sel.add(c.key):sel.delete(c.key);td.appendChild(cb)}else td.textContent=v;tr.appendChild(td)});
+  const td=document.createElement("td"),b=document.createElement("button");b.className="btn sm";b.textContent="Delete";b.onclick=()=>confirmDel([c.key]);td.appendChild(b);tr.appendChild(td);$("rows").appendChild(tr)});
+ shown+=PAGE;$("more").classList.toggle("hidden",shown>=view.length);
+}
+$("more").onclick=more;
+let t;["q","fc","fs","fd"].forEach(i=>$(i).oninput=()=>{clearTimeout(t);t=setTimeout(filter,250)});
+$("all").onchange=e=>{view.forEach(c=>e.target.checked?sel.add(c.key):sel.delete(c.key));$("rows").querySelectorAll("input").forEach(x=>x.checked=e.target.checked)};
+
+function confirmDel(keys){if(!keys.length)return toast("No contacts selected.");
+ $("dm").textContent=keys.length===1?"Are you sure you want to delete this contact?":`Are you sure you want to delete ${keys.length} contacts?`;
+ $("dlg").showModal();$("dn").onclick=()=>$("dlg").close();
+ $("dy").onclick=async()=>{$("dlg").close();
+  try{const u={};keys.forEach(k=>u[k]=null);await update(ref(db,"contacts"),u);all=all.filter(c=>!keys.includes(c.key));keys.forEach(k=>sel.delete(k));stats();filter();toast("Deleted.","ok")}catch(e){toast("Delete failed.")}}}
+$("del").onclick=()=>confirmDel([...sel]);
+
+async function exportVcf(list){
+ if(!list.length)return toast("No contacts available for export.");
+ const lim=Math.max(1,vcfLimit),parts=Math.ceil(list.length/lim);
+ for(let p=0;p<parts;p++){
+  const chunk=list.slice(p*lim,(p+1)*lim);
+  const txt=chunk.map(c=>`BEGIN:VCARD\r\nVERSION:3.0\r\nFN:${c.name.replace(/[\r\n,;]/g," ")}\r\nTEL;TYPE=CELL:+${c.phone}\r\nEND:VCARD`).join("\r\n")+"\r\n";
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type:"text/vcard"}));
+  a.download=`contacts-${String(p+1).padStart(3,"0")}.vcf`;a.click();URL.revokeObjectURL(a.href);
+  $("prog").textContent=`Preparing VCF... ${Math.min((p+1)*lim,list.length)} / ${list.length} contacts processed`;
+  await new Promise(r=>setTimeout(r,400));
+ }
+ $("prog").textContent=`Done: ${parts} file(s) created.`;
+}
+$("exA").onclick=()=>exportVcf(view);
+$("exS").onclick=()=>exportVcf(all.filter(c=>sel.has(c.key)));
+
+$("ss").onclick=async()=>{
+ const v=parseInt($("sv").value,10);if(!(v>0))return toast("Enter a valid VCF limit.");
+ try{await set(ref(db,"settings/public"),{siteName:$("sn").value.trim().slice(0,60),registrationEnabled:$("se").value==="1",maintenance:$("sm").value==="1"});
+  await set(ref(db,"settings/private"),{vcfLimit:v});vcfLimit=v;toast("Settings saved.","ok")}catch(e){toast("Could not save settings.")}};
+document.querySelectorAll(".tabs .btn").forEach(b=>b.onclick=()=>{
+ document.querySelectorAll(".tabs .btn").forEach(x=>x.classList.add("ghost"));b.classList.remove("ghost");
+ ["c","a","s"].forEach(k=>$("t-"+k).classList.toggle("hidden",k!==b.dataset.t))});
+</script></body></html>
