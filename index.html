@@ -3,7 +3,7 @@
 <style>
 :root{--red:#d4122a;--red2:#ff3b4e;--gold:#e8c15a;--gold2:#b98a1f;--glass:rgba(255,255,255,.06);--line:rgba(232,193,90,.35)}
 *{box-sizing:border-box;margin:0}
-body{font-family:-apple-system,"SF Pro Display",Inter,system-ui,sans-serif;color:#f5efe0;min-height:100vh;background:radial-gradient(600px 400px at 10% -5%,rgba(212,18,42,.35),transparent),radial-gradient(500px 400px at 100% 100%,rgba(232,193,90,.15),transparent),#0b0909}
+body{font-family:-apple-system,"SF Pro Display",Inter,system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;color:#f5efe0;min-height:100vh;background:radial-gradient(600px 400px at 10% -5%,rgba(212,18,42,.35),transparent),radial-gradient(500px 400px at 100% 100%,rgba(232,193,90,.15),transparent),#0b0909}
 .wrap{max-width:720px;margin:auto;padding:20px 16px 60px}
 .glass{background:var(--glass);border:1px solid var(--line);border-radius:28px;padding:22px;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 10px 40px rgba(0,0,0,.5),0 0 40px rgba(212,18,42,.12)}
 h1{font-size:clamp(2rem,8vw,3.2rem);background:linear-gradient(90deg,var(--gold),#fff3c4,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.1}
@@ -12,6 +12,7 @@ h1{font-size:clamp(2rem,8vw,3.2rem);background:linear-gradient(90deg,var(--gold)
 label{display:block;font-size:.85rem;margin:14px 0 6px;color:var(--gold)}
 input,select{width:100%;min-height:50px;padding:0 16px;border-radius:16px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:#fff;font-size:16px;outline:none}
 select option{background:#1a0b0e}
+textarea{padding:12px 16px;min-height:170px;font:12px/1.4 monospace;resize:vertical}.uid{word-break:break-all;color:var(--gold);font-family:monospace}
 input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(232,193,90,.2)}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:54px;margin-top:14px;border:0;border-radius:18px;font-weight:700;letter-spacing:.06em;font-size:1rem;color:#fff;cursor:pointer;text-decoration:none;background:linear-gradient(135deg,var(--red2),var(--red) 60%,#7a0a18);box-shadow:0 0 24px rgba(212,18,42,.55),inset 0 1px 0 rgba(255,255,255,.3);transition:.2s}
 .btn:active{transform:scale(.97)}.btn:hover{filter:brightness(1.12)}
@@ -46,10 +47,9 @@ dialog{border:1px solid var(--line);border-radius:24px;background:#1a0b0e;color:
 
 <!-- SETUP / FATAL -->
 <div class="wrap hidden" id="setup"><div class="glass" style="margin-top:40px">
- <h2 style="color:var(--gold)">One-time setup</h2>
- <p class="sub" id="setupMsg">Paste the exact Realtime Database URL from Firebase Console (Build → Realtime Database → Data tab, the link shown at the top).</p>
- <input id="dburl" placeholder="https://your-db.firebaseio.com">
- <button class="btn" id="dbsave">SAVE &amp; CONTINUE</button></div></div>
+ <h2 style="color:var(--gold)">Service unavailable</h2>
+ <p class="sub" id="setupMsg"></p>
+ <button class="btn" onclick="location.reload()">TRY AGAIN</button></div></div>
 
 <!-- PUBLIC -->
 <div class="wrap hidden" id="pub">
@@ -94,7 +94,7 @@ dialog{border:1px solid var(--line);border-radius:24px;background:#1a0b0e;color:
 <button class="btn" id="si">SIGN IN</button><a href="#" class="btn ghost" style="margin-top:10px">← Back to site</a></div>
 <div id="app" class="hidden">
 <div class="row" style="align-items:center"><h1 style="font-size:1.8rem">Dashboard</h1><button class="btn ghost sm" id="out" style="flex:0">Logout</button></div>
-<div class="tabs"><button class="btn sm" data-t="c">Contacts</button><button class="btn sm ghost" data-t="a">Analytics</button><button class="btn sm ghost" data-t="s">Settings</button></div>
+<div class="tabs"><button class="btn sm" data-t="c">Contacts</button><button class="btn sm ghost" data-t="a">Analytics</button><button class="btn sm ghost" data-t="s">Settings</button><button class="btn sm ghost" data-t="u">Setup</button></div>
 <div class="stats" id="stats"></div>
 <section id="t-c" class="glass">
  <div class="row wrapr"><input id="q" placeholder="Search name, number, country"><select id="fc"></select><select id="fs"><option value="">Any status</option><option>active</option></select><input id="fd" type="date"></div>
@@ -110,11 +110,18 @@ dialog{border:1px solid var(--line);border-radius:24px;background:#1a0b0e;color:
  <label>Maintenance Mode</label><select id="sm"><option value="0">Off</option><option value="1">On</option></select>
  <label>VCF Contact Limit (100, 250, 500, 1000, 2000 or custom)</label><input id="sv" type="number" min="1">
  <button class="btn" id="ss">SAVE SETTINGS</button>
+</section>
+<section id="t-u" class="glass hidden">
+ <h3 style="color:var(--gold)">Database security setup</h3>
+ <p class="sub">Your admin UID (signed in as the administrator):</p><p class="uid" id="uidv"></p>
+ <p class="sub" style="margin-bottom:8px">1. Copy the rules below. 2. Firebase Console → Realtime Database → Rules → paste → Publish. The UID is already filled in.</p>
+ <textarea id="rulesTa" readonly></textarea>
+ <div class="row wrapr" style="margin-top:12px"><button class="btn sm gold" id="cpRules">Copy rules</button><a class="btn sm ghost" target="_blank" rel="noopener" href="https://console.firebase.google.com/project/popkidcontacts2026/database">Open Firebase Console</a></div>
 </section></div></div>
 <dialog id="dlg"><p id="dm"></p><div class="row" style="margin-top:16px"><button class="btn ghost sm" id="dn">Cancel</button><button class="btn sm" id="dy">Delete</button></div></dialog>
 
 <script type="module">
-const DB_URL = ""; // optional: paste your exact Realtime Database URL here instead of using the setup screen
+const DB_URL = ""; // leave empty to auto-detect; or paste your exact Realtime Database URL here
 const ADMIN_EMAIL = "iantaracha@gmail.com";
 const $ = id => document.getElementById(id);
 const show = id => $(id).classList.remove("hidden");
@@ -122,14 +129,23 @@ const hideLoader = () => $("loader").classList.add("hide");
 const toast = (m, t = "") => { const d = document.createElement("div"); d.className = "toast " + t; d.textContent = m; document.body.appendChild(d); setTimeout(() => d.remove(), 4500) };
 setTimeout(hideLoader, 7000); // safety: never hang on the loader
 
-let dbUrl = DB_URL; try { dbUrl = dbUrl || localStorage.getItem("dbUrl") || "" } catch (e) {}
-$("dbsave").onclick = () => {
-  const v = $("dburl").value.trim().replace(/\/$/, "");
-  if (!/^https:\/\/.+\.(firebaseio\.com|firebasedatabase\.app)$/.test(v)) return toast("That doesn't look like a Realtime Database URL.");
-  try { localStorage.setItem("dbUrl", v) } catch (e) {} location.reload();
-};
-function needSetup(msg) { if (msg) $("setupMsg").textContent = msg; show("setup"); hideLoader(); }
-if (!dbUrl) { needSetup(); throw 0; }
+function needSetup(msg) { $("setupMsg").textContent = msg || "We couldn't reach the database. Please try again shortly."; show("setup"); hideLoader(); }
+// Database URL is built in: tried in order until one answers (401/200 = exists, 404 = wrong region).
+const CANDIDATES = [
+  "https://popkidcontacts2026-default-rtdb.firebaseio.com",
+  "https://popkidcontacts2026-default-rtdb.europe-west1.firebasedatabase.app",
+  "https://popkidcontacts2026-default-rtdb.asia-southeast1.firebasedatabase.app"];
+let dbUrl = DB_URL;
+if (!dbUrl) {
+  try { dbUrl = localStorage.getItem("dbUrl") || "" } catch (e) {}
+}
+if (!dbUrl) {
+  const probe = async u => { const c = new AbortController(), t = setTimeout(() => c.abort(), 6000);
+    try { const r = await fetch(u + "/.json?shallow=true", { signal: c.signal }); return r.status !== 404 ? u : null } catch (e) { return null } finally { clearTimeout(t) } };
+  dbUrl = (await Promise.all(CANDIDATES.map(probe))).find(Boolean) || "";
+  if (dbUrl) { try { localStorage.setItem("dbUrl", dbUrl) } catch (e) {} }
+}
+if (!dbUrl) { needSetup("Database not found. Check that the Realtime Database exists in project popkidcontacts2026."); throw 0; }
 
 let F;
 try {
@@ -140,9 +156,10 @@ try {
     storageBucket: "popkidcontacts2026.firebasestorage.app", messagingSenderId: "54520291773", appId: "1:54520291773:web:3d59aa793f17155b75b2d4",
     measurementId: "G-5LVDPMWWVJ", databaseURL: dbUrl });
   F = { ...U, ...D, auth: U.getAuth(app), db: D.getDatabase(app) };
+  import(g + "/firebase-analytics.js").then(m => m.isSupported().then(ok => ok && m.getAnalytics(app))).catch(() => {}); // analytics is optional
 } catch (e) {
   console.error(e);
-  needSetup("Could not start Firebase (" + (e.message || e) + "). Check the database URL below and your connection.");
+  try { localStorage.removeItem("dbUrl") } catch (_) {} needSetup("Could not start Firebase (" + (e.message || e) + ").");
   throw e;
 }
 const { auth, db, ref, get, update, set, query, orderByChild, serverTimestamp } = F;
@@ -203,7 +220,7 @@ async function initPublic() {
     } catch (err) {
       console.error(err);
       const c = String(err.code || err.message).toUpperCase();
-      toast(c.includes("PERMISSION") ? "Database rules are blocking this request. Publish database.rules.json." : "We couldn't save your contact right now. Please try again.");
+      toast(c.includes("PERMISSION") ? "Database rules not published yet. Sign in at #admin → Setup tab and publish the rules." : "We couldn't save your contact right now. Please try again.");
     }
     hideLoader();
   };
@@ -217,20 +234,40 @@ function initAdmin() {
   const PAGE = 50; let all = [], view = [], shown = 0, sel = new Set(), vcfLimit = 500;
   const fmt = t => new Date(t).toLocaleDateString();
   F.onAuthStateChanged(auth, u => {
-    if (u && u.email === ADMIN_EMAIL) { $("login").classList.add("hidden"); show("app"); load() }
+    if (u && u.email === ADMIN_EMAIL) { uid = u.uid; fillSetup(); $("login").classList.add("hidden"); show("app"); load() }
     else { if (u) { F.signOut(auth); toast("Unauthorized account.") } $("app").classList.add("hidden"); show("login") }
   });
   const signin = async () => { $("si").textContent = "Signing in...";
-    try { await F.signInWithEmailAndPassword(auth, $("em").value.trim(), $("pw").value) } catch (e) { toast("Invalid email or password.") }
+    try { await F.signInWithEmailAndPassword(auth, $("em").value.trim(), $("pw").value) } catch (e) { const c = e.code || ""; toast(c.includes("operation-not-allowed") ? "Enable Email/Password sign-in in Firebase Authentication." : c.includes("network") ? "Network error. Check your connection." : c.includes("too-many") ? "Too many attempts. Try again later." : "Invalid email or password. (" + c.replace("auth/", "") + ")") }
     $("si").textContent = "SIGN IN" };
   $("si").onclick = signin; $("pw").onkeydown = e => { if (e.key === "Enter") signin() };
   $("out").onclick = () => F.signOut(auth);
+
+  let uid = "";
+  function rulesText(u) {
+    const A = "auth != null && auth.uid === '" + u + "'", P = "$phone.matches(/^[0-9]{6,15}$/)";
+    const rules = { rules: {
+      contacts: { ".read": A, "$phone": {
+        ".write": "(" + A + ") || (!data.exists() && newData.exists())",
+        ".validate": P + " && newData.hasChildren(['name','phone','country','countryCode','createdAt','status']) && newData.child('phone').val() === $phone && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 80 && !newData.child('name').val().matches(/[<>]/) && newData.child('country').isString() && newData.child('country').val().length <= 60 && newData.child('countryCode').val().matches(/^[+][0-9]{1,4}$/) && newData.child('status').val() === 'active' && newData.child('createdAt').val() === now" } },
+      lookup: { "$phone": { ".read": true, ".write": "(" + A + ") || (!data.exists() && newData.val() === true)", ".validate": P } },
+      settings: { public: { ".read": true, ".write": A }, private: { ".read": A, ".write": A } },
+      analytics: { ".read": A, ".write": A } } };
+    return JSON.stringify(rules, null, 2);
+  }
+  function fillSetup() { $("uidv").textContent = uid; $("rulesTa").value = rulesText(uid) }
+  $("cpRules").onclick = async () => {
+    try { await navigator.clipboard.writeText($("rulesTa").value) } catch (e) { $("rulesTa").select(); document.execCommand("copy") }
+    toast("Rules copied.", "ok") };
+  function tab(k) {
+    document.querySelectorAll(".tabs .btn").forEach(x => x.classList.toggle("ghost", x.dataset.t !== k));
+    ["c", "a", "s", "u"].forEach(x => $("t-" + x).classList.toggle("hidden", x !== k)) }
 
   async function load() {
     try {
       const snap = await withTimeout(get(query(ref(db, "contacts"), orderByChild("createdAt"))), 20000);
       all = []; snap.forEach(s => { all.push({ key: s.key, ...s.val() }) }); all.reverse();
-    } catch (e) { toast("Could not load contacts. Publish the rules with your admin UID."); console.error(e); return }
+    } catch (e) { toast("Could not load contacts. Publish the rules shown in the Setup tab."); console.error(e); tab("u"); return }
     let s = {}, p = {};
     try { s = (await get(ref(db, "settings/public"))).val() || {}; p = (await get(ref(db, "settings/private"))).val() || {} } catch (e) {}
     $("sn").value = s.siteName || ""; $("se").value = s.registrationEnabled === false ? "0" : "1"; $("sm").value = s.maintenance ? "1" : "0";
@@ -303,8 +340,6 @@ function initAdmin() {
     const v = parseInt($("sv").value, 10); if (!(v > 0)) return toast("Enter a valid VCF limit.");
     try { await set(ref(db, "settings/public"), { siteName: $("sn").value.trim().slice(0, 60), registrationEnabled: $("se").value === "1", maintenance: $("sm").value === "1" });
       await set(ref(db, "settings/private"), { vcfLimit: v }); vcfLimit = v; toast("Settings saved.", "ok") } catch (e) { toast("Could not save settings.") } };
-  document.querySelectorAll(".tabs .btn").forEach(b => b.onclick = () => {
-    document.querySelectorAll(".tabs .btn").forEach(x => x.classList.add("ghost")); b.classList.remove("ghost");
-    ["c", "a", "s"].forEach(k => $("t-" + k).classList.toggle("hidden", k !== b.dataset.t)) });
+  document.querySelectorAll(".tabs .btn").forEach(b => b.onclick = () => tab(b.dataset.t));
 }
 </script></body></html>
