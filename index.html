@@ -1,30 +1,77 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Connect. Stay Connected.</title>
-<link rel="stylesheet" href="style.css"></head><body>
-<div class="loader" id="loader"><div class="ring"></div><p>Preparing your experience...</p></div>
-<div class="wrap">
+<style>
+:root{--red:#d4122a;--red2:#ff3b4e;--gold:#e8c15a;--gold2:#b98a1f;--glass:rgba(255,255,255,.06);--line:rgba(232,193,90,.35)}
+*{box-sizing:border-box;margin:0}
+body{font-family:-apple-system,"SF Pro Display",Inter,system-ui,sans-serif;color:#f5efe0;min-height:100vh;background:radial-gradient(600px 400px at 10% -5%,rgba(212,18,42,.35),transparent),radial-gradient(500px 400px at 100% 100%,rgba(232,193,90,.15),transparent),#0b0909}
+.wrap{max-width:720px;margin:auto;padding:20px 16px 60px}
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:28px;padding:22px;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 10px 40px rgba(0,0,0,.5),0 0 40px rgba(212,18,42,.12)}
+h1{font-size:clamp(2rem,8vw,3.2rem);background:linear-gradient(90deg,var(--gold),#fff3c4,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.1}
+.badge{display:inline-block;padding:6px 14px;border-radius:99px;border:1px solid var(--line);font-size:.72rem;letter-spacing:.12em;color:var(--gold);margin-bottom:14px}
+.sub{opacity:.75;margin:12px 0 20px;line-height:1.5}
+label{display:block;font-size:.85rem;margin:14px 0 6px;color:var(--gold)}
+input,select{width:100%;min-height:50px;padding:0 16px;border-radius:16px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:#fff;font-size:16px;outline:none}
+select option{background:#1a0b0e}
+input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(232,193,90,.2)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:54px;margin-top:14px;border:0;border-radius:18px;font-weight:700;letter-spacing:.06em;font-size:1rem;color:#fff;cursor:pointer;text-decoration:none;background:linear-gradient(135deg,var(--red2),var(--red) 60%,#7a0a18);box-shadow:0 0 24px rgba(212,18,42,.55),inset 0 1px 0 rgba(255,255,255,.3);transition:.2s}
+.btn:active{transform:scale(.97)}.btn:hover{filter:brightness(1.12)}
+.btn.gold{background:linear-gradient(135deg,#fff0b3,var(--gold) 50%,var(--gold2));color:#2a1c00;box-shadow:0 0 22px rgba(232,193,90,.4)}
+.btn.ghost{background:var(--glass);border:1px solid var(--line);box-shadow:none}
+.btn.sm{min-height:40px;margin:0;width:auto;padding:0 14px;font-size:.8rem;border-radius:12px}
+.row{display:flex;gap:10px}.row>*{flex:1}.wrapr{flex-wrap:wrap}
+.list{max-height:240px;overflow:auto;margin-top:6px;border-radius:16px;border:1px solid var(--line);background:rgba(10,8,8,.97)}
+.list div{padding:13px 16px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05)}.list div:hover{background:rgba(212,18,42,.25)}
+.toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:99;max-width:92vw;padding:14px 20px;border-radius:18px;backdrop-filter:blur(20px);border:1px solid var(--line);background:rgba(60,8,14,.92);animation:in .3s}
+.toast.ok{background:rgba(20,50,25,.92)}@keyframes in{from{opacity:0;top:0}}
+.loader{position:fixed;inset:0;z-index:98;display:grid;place-content:center;justify-items:center;gap:18px;background:#0b0909;transition:opacity .4s}
+.loader.hide{opacity:0;pointer-events:none}
+.ring{width:72px;height:72px;border-radius:50%;border:4px solid rgba(212,18,42,.25);border-top-color:var(--red2);animation:sp 1s linear infinite;position:relative;box-shadow:0 0 28px rgba(212,18,42,.6)}
+.ring:after{content:"";position:absolute;inset:18px;border-radius:50%;background:radial-gradient(var(--gold),var(--gold2));animation:pl 1s ease-in-out infinite alternate}
+@keyframes sp{to{transform:rotate(360deg)}}@keyframes pl{to{transform:scale(.6);opacity:.6}}
+.check{width:84px;height:84px;margin:0 auto 14px;border-radius:50%;display:grid;place-content:center;font-size:2.6rem;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#2a1c00;animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(0)}}
+.steps{display:grid;gap:12px;margin:26px 0}.steps b{color:var(--gold)}.steps p{opacity:.75;margin-top:4px;font-size:.92rem}
+.hidden{display:none!important}.center{text-align:center}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:16px 0}
+.stat{padding:16px;border-radius:20px}.stat b{display:block;font-size:1.9rem;color:var(--gold)}.stat span{font-size:.72rem;opacity:.7;letter-spacing:.1em}
+table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:10px 8px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}
+.scroll{overflow-x:auto}.cb{width:auto!important;min-height:0!important}
+dialog{border:1px solid var(--line);border-radius:24px;background:#1a0b0e;color:#fff;padding:24px;max-width:340px;margin:auto}dialog::backdrop{background:rgba(0,0,0,.6)}
+.tabs{display:flex;gap:8px;margin:14px 0;overflow-x:auto}.tabs .btn{flex:0 0 auto}
+.err{color:#ff8a94}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.11.4/bundle/libphonenumber-max.js"></script>
+</head><body>
+<div class="loader" id="loader"><div class="ring"></div><p id="lt">Preparing your experience...</p></div>
+
+<!-- SETUP / FATAL -->
+<div class="wrap hidden" id="setup"><div class="glass" style="margin-top:40px">
+ <h2 style="color:var(--gold)">One-time setup</h2>
+ <p class="sub" id="setupMsg">Paste the exact Realtime Database URL from Firebase Console (Build → Realtime Database → Data tab, the link shown at the top).</p>
+ <input id="dburl" placeholder="https://your-db.firebaseio.com">
+ <button class="btn" id="dbsave">SAVE &amp; CONTINUE</button></div></div>
+
+<!-- PUBLIC -->
+<div class="wrap hidden" id="pub">
 <div class="center" style="padding:30px 0 20px"><span class="badge">● SECURE CONTACT REGISTRATION</span>
 <h1>Connect. Stay Connected.</h1>
 <p class="sub">Register your WhatsApp contact and stay connected with our community, updates and opportunities.</p>
-<a class="btn" href="#reg" style="max-width:320px;margin:auto">REGISTER MY CONTACT</a></div>
-
+<a class="btn" href="#reg" style="max-width:320px;margin:14px auto 0">REGISTER MY CONTACT</a></div>
 <div class="glass" id="reg">
  <div id="off" class="hidden center"><h2 id="offT"></h2><p class="sub" id="offM"></p></div>
- <form id="form" autocomplete="off">
+ <form id="form" autocomplete="off" novalidate>
   <label>👤 Your Name</label><input id="name" maxlength="80" placeholder="Enter your full name">
-  <label>🌍 Select Your Country</label>
-  <input id="cq" placeholder="Search country or code..." >
+  <label>🌍 Select Your Country</label><input id="cq" placeholder="Search country or code...">
   <div class="list hidden" id="clist"></div>
   <label>📱 WhatsApp Number</label>
-  <div class="row"><input id="cc" readonly style="flex:0 0 38%" placeholder="🌍 +"><input id="num" inputmode="tel" style="flex:1" placeholder="Enter your WhatsApp number"></div>
-  <button class="btn" id="go">✨ SAVE MY CONTACT</button>
+  <div class="row"><input id="cc" readonly style="flex:0 0 38%" placeholder="🌍 +"><input id="num" inputmode="tel" placeholder="Enter your WhatsApp number"></div>
+  <button class="btn" type="submit">✨ SAVE MY CONTACT</button>
  </form>
  <div id="done" class="hidden center"><div class="check">✓</div><h2>You're All Set! ✨</h2>
-  <p class="sub">Your WhatsApp contact has been successfully registered.</p><p id="summary"></p>
+  <p class="sub">Your WhatsApp contact has been successfully registered.</p><div id="summary" style="line-height:1.8"></div>
   <button class="btn gold" id="ok">DONE</button></div>
+ <div id="dup" class="hidden center"><h2 style="color:var(--gold)">Already Registered</h2><p class="sub">This WhatsApp number has already been registered.</p><button class="btn ghost" id="dupok">TRY ANOTHER NUMBER</button></div>
 </div>
-<div id="dup" class="hidden"></div>
-
 <div class="steps">
  <div class="glass"><b>01 — SELECT YOUR COUNTRY</b><p>Choose your country and automatically use the correct international calling code.</p></div>
  <div class="glass"><b>02 — ADD YOUR DETAILS</b><p>Enter your name and WhatsApp number.</p></div>
@@ -33,57 +80,231 @@
 <a class="btn" href="https://whatsapp.com/channel/0029Vb9Iwzz1iUxTgb2Vps1S" target="_blank" rel="noopener">📢 JOIN OUR CHANNEL</a>
 <a class="btn gold" href="https://chat.whatsapp.com/Lol0Goj9qSmApSwgBdI72i" target="_blank" rel="noopener">👥 JOIN OUR GROUP</a>
 <a class="btn ghost" href="https://wa.me/254100853391" target="_blank" rel="noopener">🤖 NEED WHATSAPP BOT?</a>
-
 <div class="glass" style="margin-top:30px"><h3 style="color:var(--gold)">Your Privacy Matters</h3>
 <p class="sub">Your contact information is securely stored and is not publicly displayed.</p>
-<p style="font-size:.9rem;line-height:1.6;opacity:.8"><b>Collected:</b> your name, country and WhatsApp number.<br><b>Why:</b> to keep you connected with community updates.<br><b>Stored:</b> in a private, access-controlled database; only the administrator can view it.<br><b>Used:</b> for community communication only.<br><b>Removal:</b> message us on WhatsApp (button above) and we will delete your contact.</p></div>
+<p style="font-size:.9rem;line-height:1.7;opacity:.8"><b>Collected:</b> your name, country and WhatsApp number.<br><b>Why:</b> to keep you connected with community updates.<br><b>Stored:</b> in a private, access-controlled database that only the administrator can read.<br><b>Used:</b> for community communication only.<br><b>Removal:</b> message us on WhatsApp (button above) and we will delete your contact.</p>
+<p style="margin-top:14px;font-size:.75rem;opacity:.4"><a href="#admin" style="color:inherit">Admin</a></p></div>
 </div>
+
+<!-- ADMIN -->
+<div class="wrap hidden" id="adm" style="max-width:1000px">
+<div id="login" class="glass hidden" style="max-width:420px;margin:60px auto"><h1 style="font-size:2rem">Admin</h1>
+<label>Email</label><input id="em" type="email" autocomplete="username">
+<label>Password</label><input id="pw" type="password" autocomplete="current-password">
+<button class="btn" id="si">SIGN IN</button><a href="#" class="btn ghost" style="margin-top:10px">← Back to site</a></div>
+<div id="app" class="hidden">
+<div class="row" style="align-items:center"><h1 style="font-size:1.8rem">Dashboard</h1><button class="btn ghost sm" id="out" style="flex:0">Logout</button></div>
+<div class="tabs"><button class="btn sm" data-t="c">Contacts</button><button class="btn sm ghost" data-t="a">Analytics</button><button class="btn sm ghost" data-t="s">Settings</button></div>
+<div class="stats" id="stats"></div>
+<section id="t-c" class="glass">
+ <div class="row wrapr"><input id="q" placeholder="Search name, number, country"><select id="fc"></select><select id="fs"><option value="">Any status</option><option>active</option></select><input id="fd" type="date"></div>
+ <div class="row wrapr" style="margin-top:12px"><button class="btn sm gold" id="exA">Export VCF (filtered)</button><button class="btn sm gold" id="exS">Export selected</button><button class="btn sm" id="del">Delete selected</button></div>
+ <p id="prog" style="margin:10px 0;color:var(--gold)"></p>
+ <div class="scroll"><table><thead><tr><th><input type="checkbox" class="cb" id="all"></th><th>Name</th><th>Country</th><th>Code</th><th>WhatsApp</th><th>Added</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+ <p id="empty" class="center sub hidden"></p><button class="btn ghost sm" id="more" style="margin:14px auto 0">Load more</button>
+</section>
+<section id="t-a" class="glass hidden"><h3>Contacts by country</h3><div id="byc"></div><h3 style="margin-top:18px">Last 14 days</h3><div id="trend"></div></section>
+<section id="t-s" class="glass hidden">
+ <label>Website Name</label><input id="sn">
+ <label>Registration</label><select id="se"><option value="1">Enabled</option><option value="0">Disabled</option></select>
+ <label>Maintenance Mode</label><select id="sm"><option value="0">Off</option><option value="1">On</option></select>
+ <label>VCF Contact Limit (100, 250, 500, 1000, 2000 or custom)</label><input id="sv" type="number" min="1">
+ <button class="btn" id="ss">SAVE SETTINGS</button>
+</section></div></div>
+<dialog id="dlg"><p id="dm"></p><div class="row" style="margin-top:16px"><button class="btn ghost sm" id="dn">Cancel</button><button class="btn sm" id="dy">Delete</button></div></dialog>
+
 <script type="module">
-import {db,toast} from "./firebase.js";
-import {ref,get,set,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import {parsePhoneNumberFromString,getCountries,getCountryCallingCode} from "https://esm.sh/libphonenumber-js@1.11.4/max";
-const $=id=>document.getElementById(id);
-const dn=new Intl.DisplayNames(["en"],{type:"region"});
-const flag=c=>[...c].map(x=>String.fromCodePoint(127397+x.charCodeAt())).join("");
-const countries=getCountries().map(c=>({c,name:dn.of(c),code:"+"+getCountryCallingCode(c)})).sort((a,b)=>a.name.localeCompare(b.name));
-let sel=null,last=0;
-function render(q=""){q=q.toLowerCase().replace("+","");
- const r=countries.filter(x=>x.name.toLowerCase().includes(q)||x.code.slice(1).startsWith(q)).slice(0,60);
- $("clist").innerHTML="";r.forEach(x=>{const d=document.createElement("div");d.textContent=`${flag(x.c)}  ${x.name}  ${x.code}`;
-  d.onclick=()=>{sel=x;$("cq").value=x.name;$("cc").value=`${flag(x.c)} ${x.code}`;$("clist").classList.add("hidden");$("num").focus()};$("clist").appendChild(d)});
- $("clist").classList.toggle("hidden",!r.length)}
-$("cq").oninput=e=>{sel=null;$("cc").value="";render(e.target.value)};$("cq").onfocus=()=>render($("cq").value);
-(async()=>{
- try{const s=(await get(ref(db,"settings/public"))).val()||{};
-  if(s.siteName)document.title=s.siteName;
-  if(s.maintenance){$("form").classList.add("hidden");$("off").classList.remove("hidden");$("offT").textContent="We're currently improving your experience.";$("offM").textContent="Please check back shortly."}
-  else if(s.registrationEnabled===false){$("form").classList.add("hidden");$("off").classList.remove("hidden");$("offT").textContent="Registration is currently unavailable.";$("offM").textContent="Contact registration is temporarily unavailable."}
- }catch(e){}
- $("loader").classList.add("hide");
-})();
-$("form").onsubmit=async e=>{e.preventDefault();
- const name=$("name").value.replace(/[<>]/g,"").replace(/\s+/g," ").trim();
- if(!name)return toast("Please enter your name.");
- if(!sel)return toast("Please select your country.");
- const p=parsePhoneNumberFromString($("num").value.replace(/[\s()\-.]/g,""),sel.c);
- if(!p||!p.isValid())return toast("Please enter a valid WhatsApp number.");
- if(Date.now()-last<8000)return toast("Please wait a moment before trying again.");
- last=Date.now();
- const phone=p.number.slice(1);
- $("loader").querySelector("p").textContent="Securing your contact...";$("loader").classList.remove("hide");
- try{
-  await set(ref(db,"contacts/"+phone),{name,phone,country:sel.name,countryCode:sel.code,createdAt:serverTimestamp(),status:"active"});
-  $("form").classList.add("hidden");$("done").classList.remove("hidden");
-  $("summary").innerHTML="";
-  [["Name",name],["Country",sel.name],["Number","+"+phone.slice(0,3)+" "+"•".repeat(Math.max(phone.length-5,3))+phone.slice(-2)]].forEach(([k,v])=>{const d=document.createElement("div");d.textContent=`${k}: ${v}`;$("summary").appendChild(d)});
- }catch(err){
-  if(String(err.code||err.message).toUpperCase().includes("PERMISSION")){
-   toast("This WhatsApp number has already been registered.");
-   const d=$("dup");d.className="glass center";d.style.marginTop="14px";d.innerHTML="<b style='color:var(--gold)'>Already Registered</b><p class='sub'>This WhatsApp number has already been registered.</p>";
-   setTimeout(()=>d.className="hidden",5000);
-  }else toast("We couldn't save your contact right now. Please try again.");
- }
- $("loader").classList.add("hide");
+const DB_URL = ""; // optional: paste your exact Realtime Database URL here instead of using the setup screen
+const ADMIN_EMAIL = "iantaracha@gmail.com";
+const $ = id => document.getElementById(id);
+const show = id => $(id).classList.remove("hidden");
+const hideLoader = () => $("loader").classList.add("hide");
+const toast = (m, t = "") => { const d = document.createElement("div"); d.className = "toast " + t; d.textContent = m; document.body.appendChild(d); setTimeout(() => d.remove(), 4500) };
+setTimeout(hideLoader, 7000); // safety: never hang on the loader
+
+let dbUrl = DB_URL; try { dbUrl = dbUrl || localStorage.getItem("dbUrl") || "" } catch (e) {}
+$("dbsave").onclick = () => {
+  const v = $("dburl").value.trim().replace(/\/$/, "");
+  if (!/^https:\/\/.+\.(firebaseio\.com|firebasedatabase\.app)$/.test(v)) return toast("That doesn't look like a Realtime Database URL.");
+  try { localStorage.setItem("dbUrl", v) } catch (e) {} location.reload();
 };
-$("ok").onclick=()=>location.reload();
+function needSetup(msg) { if (msg) $("setupMsg").textContent = msg; show("setup"); hideLoader(); }
+if (!dbUrl) { needSetup(); throw 0; }
+
+let F;
+try {
+  const v = "10.12.2", g = "https://www.gstatic.com/firebasejs/" + v;
+  const [A, U, D] = await Promise.all([import(g + "/firebase-app.js"), import(g + "/firebase-auth.js"), import(g + "/firebase-database.js")]);
+  const app = A.initializeApp({
+    apiKey: "AIzaSyDnrIP5Vy6oVYo4HjAPGrlBB7WSKE6dnzQ", authDomain: "popkidcontacts2026.firebaseapp.com", projectId: "popkidcontacts2026",
+    storageBucket: "popkidcontacts2026.firebasestorage.app", messagingSenderId: "54520291773", appId: "1:54520291773:web:3d59aa793f17155b75b2d4",
+    measurementId: "G-5LVDPMWWVJ", databaseURL: dbUrl });
+  F = { ...U, ...D, auth: U.getAuth(app), db: D.getDatabase(app) };
+} catch (e) {
+  console.error(e);
+  needSetup("Could not start Firebase (" + (e.message || e) + "). Check the database URL below and your connection.");
+  throw e;
+}
+const { auth, db, ref, get, update, set, query, orderByChild, serverTimestamp } = F;
+const withTimeout = (p, ms = 8000) => Promise.race([p, new Promise((_, r) => setTimeout(() => r(new Error("timeout")), ms))]);
+window.addEventListener("hashchange", () => location.reload());
+if (location.hash.startsWith("#admin")) initAdmin(); else initPublic();
+
+/* ================= PUBLIC ================= */
+async function initPublic() {
+  show("pub");
+  const lp = window.libphonenumber;
+  const dn = new Intl.DisplayNames(["en"], { type: "region" });
+  const flag = c => [...c].map(x => String.fromCodePoint(127397 + x.charCodeAt())).join("");
+  const countries = lp ? lp.getCountries().map(c => ({ c, name: dn.of(c), code: "+" + lp.getCountryCallingCode(c) })).sort((a, b) => a.name.localeCompare(b.name)) : [];
+  let sel = null, last = 0;
+  const render = (q = "") => {
+    q = q.toLowerCase().replace("+", "");
+    const r = countries.filter(x => x.name.toLowerCase().includes(q) || x.code.slice(1).startsWith(q)).slice(0, 80);
+    $("clist").innerHTML = "";
+    r.forEach(x => { const d = document.createElement("div"); d.textContent = `${flag(x.c)}  ${x.name}  ${x.code}`;
+      d.onclick = () => { sel = x; $("cq").value = x.name; $("cc").value = `${flag(x.c)} ${x.code}`; $("clist").classList.add("hidden"); $("num").focus() };
+      $("clist").appendChild(d) });
+    $("clist").classList.toggle("hidden", !r.length);
+  };
+  $("cq").oninput = e => { sel = null; $("cc").value = ""; render(e.target.value) };
+  $("cq").onfocus = () => render($("cq").value);
+  document.addEventListener("click", e => { if (!e.target.closest("#clist,#cq")) $("clist").classList.add("hidden") });
+  try {
+    const s = (await withTimeout(get(ref(db, "settings/public")))).val() || {};
+    if (s.siteName) document.title = s.siteName;
+    if (s.maintenance) { $("form").classList.add("hidden"); show("off"); $("offT").textContent = "We're currently improving your experience."; $("offM").textContent = "Please check back shortly." }
+    else if (s.registrationEnabled === false) { $("form").classList.add("hidden"); show("off"); $("offT").textContent = "Registration is currently unavailable."; $("offM").textContent = "Contact registration is temporarily unavailable." }
+  } catch (e) { console.warn("settings unavailable", e) }
+  hideLoader();
+  if (!lp) toast("Phone validation library failed to load. Refresh the page.");
+  $("form").onsubmit = async e => {
+    e.preventDefault();
+    const name = $("name").value.replace(/[<>]/g, "").replace(/\s+/g, " ").trim();
+    if (!name) return toast("Please enter your name.");
+    if (!sel) return toast("Please select your country.");
+    const p = lp.parsePhoneNumberFromString($("num").value.replace(/[\s()\-.]/g, ""), sel.c);
+    if (!p || !p.isValid()) return toast("Please enter a valid WhatsApp number.");
+    if (Date.now() - last < 8000) return toast("Please wait a moment before trying again.");
+    last = Date.now();
+    const phone = p.number.slice(1);
+    $("lt").textContent = "Securing your contact..."; $("loader").classList.remove("hide");
+    try {
+      const exists = (await withTimeout(get(ref(db, "lookup/" + phone)))).exists();
+      if (exists) { $("form").classList.add("hidden"); show("dup"); toast("This WhatsApp number has already been registered."); }
+      else {
+        await withTimeout(update(ref(db), {
+          ["contacts/" + phone]: { name, phone, country: sel.name, countryCode: sel.code, createdAt: serverTimestamp(), status: "active" },
+          ["lookup/" + phone]: true }));
+        $("form").classList.add("hidden"); show("done"); $("summary").innerHTML = "";
+        [["Name", name], ["Country", sel.name], ["Number", "+" + phone.slice(0, 3) + " " + "•".repeat(Math.max(phone.length - 5, 3)) + phone.slice(-2)]]
+          .forEach(([k, v]) => { const d = document.createElement("div"); d.textContent = k + ": " + v; $("summary").appendChild(d) });
+      }
+    } catch (err) {
+      console.error(err);
+      const c = String(err.code || err.message).toUpperCase();
+      toast(c.includes("PERMISSION") ? "Database rules are blocking this request. Publish database.rules.json." : "We couldn't save your contact right now. Please try again.");
+    }
+    hideLoader();
+  };
+  $("ok").onclick = () => location.reload();
+  $("dupok").onclick = () => location.reload();
+}
+
+/* ================= ADMIN ================= */
+function initAdmin() {
+  show("adm"); hideLoader();
+  const PAGE = 50; let all = [], view = [], shown = 0, sel = new Set(), vcfLimit = 500;
+  const fmt = t => new Date(t).toLocaleDateString();
+  F.onAuthStateChanged(auth, u => {
+    if (u && u.email === ADMIN_EMAIL) { $("login").classList.add("hidden"); show("app"); load() }
+    else { if (u) { F.signOut(auth); toast("Unauthorized account.") } $("app").classList.add("hidden"); show("login") }
+  });
+  const signin = async () => { $("si").textContent = "Signing in...";
+    try { await F.signInWithEmailAndPassword(auth, $("em").value.trim(), $("pw").value) } catch (e) { toast("Invalid email or password.") }
+    $("si").textContent = "SIGN IN" };
+  $("si").onclick = signin; $("pw").onkeydown = e => { if (e.key === "Enter") signin() };
+  $("out").onclick = () => F.signOut(auth);
+
+  async function load() {
+    try {
+      const snap = await withTimeout(get(query(ref(db, "contacts"), orderByChild("createdAt"))), 20000);
+      all = []; snap.forEach(s => { all.push({ key: s.key, ...s.val() }) }); all.reverse();
+    } catch (e) { toast("Could not load contacts. Publish the rules with your admin UID."); console.error(e); return }
+    let s = {}, p = {};
+    try { s = (await get(ref(db, "settings/public"))).val() || {}; p = (await get(ref(db, "settings/private"))).val() || {} } catch (e) {}
+    $("sn").value = s.siteName || ""; $("se").value = s.registrationEnabled === false ? "0" : "1"; $("sm").value = s.maintenance ? "1" : "0";
+    vcfLimit = p.vcfLimit || 500; $("sv").value = vcfLimit;
+    const cs = [...new Set(all.map(c => c.country))].sort();
+    $("fc").innerHTML = ""; const o = document.createElement("option"); o.value = ""; o.textContent = "All countries"; $("fc").appendChild(o);
+    cs.forEach(c => { const x = document.createElement("option"); x.textContent = c; $("fc").appendChild(x) });
+    stats(); filter();
+  }
+  function stats() {
+    const now = new Date(), d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(), wk = d0 - ((now.getDay() + 6) % 7) * 864e5, mo = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    const n = t => all.filter(c => c.createdAt >= t).length;
+    $("stats").innerHTML = "";
+    [["TOTAL CONTACTS", all.length], ["TODAY", n(d0)], ["THIS WEEK", n(wk)], ["THIS MONTH", n(mo)], ["COUNTRIES", new Set(all.map(c => c.country)).size]].forEach(([k, v]) => {
+      const d = document.createElement("div"); d.className = "glass stat"; d.innerHTML = "<b>0</b><span>" + k + "</span>"; $("stats").appendChild(d);
+      let i = 0; const b = d.firstChild, st = Math.max(1, Math.ceil(v / 25)); const t = setInterval(() => { i = Math.min(v, i + st); b.textContent = i; if (i >= v) clearInterval(t) }, 30) });
+    const cnt = {}; all.forEach(c => cnt[c.country] = (cnt[c.country] || 0) + 1);
+    const bar = (l, v, m) => { const d = document.createElement("div"); d.style.margin = "6px 0"; d.innerHTML = "<small></small><div style='height:10px;border-radius:9px;background:linear-gradient(90deg,var(--red),var(--gold));width:" + Math.max(3, v / m * 100) + "%'></div>"; d.firstChild.textContent = l + " — " + v; return d };
+    $("byc").innerHTML = ""; const top = Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 15); top.forEach(([k, v]) => $("byc").appendChild(bar(k, v, top[0][1])));
+    $("trend").innerHTML = ""; const days = [...Array(14)].map((_, i) => d0 - (13 - i) * 864e5), vals = days.map(t => all.filter(c => c.createdAt >= t && c.createdAt < t + 864e5).length), mx = Math.max(1, ...vals);
+    days.forEach((t, i) => $("trend").appendChild(bar(fmt(t), vals[i], mx)));
+  }
+  function filter() {
+    const q = $("q").value.toLowerCase().trim(), fc = $("fc").value, fs = $("fs").value, fd = $("fd").value, digits = q.replace(/\D/g, "");
+    view = all.filter(c => (!q || c.name.toLowerCase().includes(q) || (digits && c.phone.includes(digits)) || c.country.toLowerCase().includes(q)) && (!fc || c.country === fc) && (!fs || c.status === fs) && (!fd || new Date(c.createdAt).toLocaleDateString("en-CA") === fd));
+    shown = 0; $("rows").innerHTML = ""; more();
+    $("empty").classList.toggle("hidden", !!view.length); $("empty").textContent = all.length ? "No contacts match your search." : "No contacts registered yet.";
+  }
+  function more() {
+    view.slice(shown, shown + PAGE).forEach(c => {
+      const tr = document.createElement("tr");
+      [null, c.name, c.country, c.countryCode, "+" + c.phone, fmt(c.createdAt), c.status].forEach((v, i) => {
+        const td = document.createElement("td");
+        if (i === 0) { const cb = document.createElement("input"); cb.type = "checkbox"; cb.className = "cb"; cb.checked = sel.has(c.key); cb.onchange = () => cb.checked ? sel.add(c.key) : sel.delete(c.key); td.appendChild(cb) } else td.textContent = v;
+        tr.appendChild(td) });
+      const td = document.createElement("td"), b = document.createElement("button"); b.className = "btn sm"; b.textContent = "Delete"; b.onclick = () => confirmDel([c.key]); td.appendChild(b); tr.appendChild(td); $("rows").appendChild(tr) });
+    shown += PAGE; $("more").classList.toggle("hidden", shown >= view.length);
+  }
+  $("more").onclick = more;
+  let t; ["q", "fc", "fs", "fd"].forEach(i => $(i).oninput = () => { clearTimeout(t); t = setTimeout(filter, 250) });
+  $("all").onchange = e => { view.forEach(c => e.target.checked ? sel.add(c.key) : sel.delete(c.key)); $("rows").querySelectorAll(".cb").forEach(x => x.checked = e.target.checked) };
+
+  function confirmDel(keys) {
+    if (!keys.length) return toast("No contacts selected.");
+    $("dm").textContent = keys.length === 1 ? "Are you sure you want to delete this contact?" : "Are you sure you want to delete " + keys.length + " contacts?";
+    $("dlg").showModal(); $("dn").onclick = () => $("dlg").close();
+    $("dy").onclick = async () => { $("dlg").close();
+      try { const u = {}; keys.forEach(k => { u["contacts/" + k] = null; u["lookup/" + k] = null }); await update(ref(db), u);
+        all = all.filter(c => !keys.includes(c.key)); keys.forEach(k => sel.delete(k)); stats(); filter(); toast("Deleted.", "ok") }
+      catch (e) { toast("Delete failed.") } };
+  }
+  $("del").onclick = () => confirmDel([...sel]);
+
+  async function exportVcf(list) {
+    if (!list.length) return toast("No contacts available for export.");
+    const lim = Math.max(1, vcfLimit), parts = Math.ceil(list.length / lim);
+    for (let p = 0; p < parts; p++) {
+      const chunk = list.slice(p * lim, (p + 1) * lim);
+      const txt = chunk.map(c => "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:" + c.name.replace(/[\r\n,;]/g, " ") + "\r\nTEL;TYPE=CELL:+" + c.phone + "\r\nEND:VCARD").join("\r\n") + "\r\n";
+      const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([txt], { type: "text/vcard" }));
+      a.download = "contacts-" + String(p + 1).padStart(3, "0") + ".vcf"; document.body.appendChild(a); a.click(); a.remove();
+      $("prog").textContent = "Preparing VCF... " + Math.min((p + 1) * lim, list.length) + " / " + list.length + " contacts processed";
+      await new Promise(r => setTimeout(r, 500));
+    }
+    $("prog").textContent = "Done: " + parts + " file(s) created.";
+  }
+  $("exA").onclick = () => exportVcf(view);
+  $("exS").onclick = () => exportVcf(all.filter(c => sel.has(c.key)));
+  $("ss").onclick = async () => {
+    const v = parseInt($("sv").value, 10); if (!(v > 0)) return toast("Enter a valid VCF limit.");
+    try { await set(ref(db, "settings/public"), { siteName: $("sn").value.trim().slice(0, 60), registrationEnabled: $("se").value === "1", maintenance: $("sm").value === "1" });
+      await set(ref(db, "settings/private"), { vcfLimit: v }); vcfLimit = v; toast("Settings saved.", "ok") } catch (e) { toast("Could not save settings.") } };
+  document.querySelectorAll(".tabs .btn").forEach(b => b.onclick = () => {
+    document.querySelectorAll(".tabs .btn").forEach(x => x.classList.add("ghost")); b.classList.remove("ghost");
+    ["c", "a", "s"].forEach(k => $("t-" + k).classList.toggle("hidden", k !== b.dataset.t)) });
+}
 </script></body></html>
