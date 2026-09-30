@@ -1,0 +1,89 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Connect. Stay Connected.</title>
+<link rel="stylesheet" href="style.css"></head><body>
+<div class="loader" id="loader"><div class="ring"></div><p>Preparing your experience...</p></div>
+<div class="wrap">
+<div class="center" style="padding:30px 0 20px"><span class="badge">● SECURE CONTACT REGISTRATION</span>
+<h1>Connect. Stay Connected.</h1>
+<p class="sub">Register your WhatsApp contact and stay connected with our community, updates and opportunities.</p>
+<a class="btn" href="#reg" style="max-width:320px;margin:auto">REGISTER MY CONTACT</a></div>
+
+<div class="glass" id="reg">
+ <div id="off" class="hidden center"><h2 id="offT"></h2><p class="sub" id="offM"></p></div>
+ <form id="form" autocomplete="off">
+  <label>👤 Your Name</label><input id="name" maxlength="80" placeholder="Enter your full name">
+  <label>🌍 Select Your Country</label>
+  <input id="cq" placeholder="Search country or code..." >
+  <div class="list hidden" id="clist"></div>
+  <label>📱 WhatsApp Number</label>
+  <div class="row"><input id="cc" readonly style="flex:0 0 38%" placeholder="🌍 +"><input id="num" inputmode="tel" style="flex:1" placeholder="Enter your WhatsApp number"></div>
+  <button class="btn" id="go">✨ SAVE MY CONTACT</button>
+ </form>
+ <div id="done" class="hidden center"><div class="check">✓</div><h2>You're All Set! ✨</h2>
+  <p class="sub">Your WhatsApp contact has been successfully registered.</p><p id="summary"></p>
+  <button class="btn gold" id="ok">DONE</button></div>
+</div>
+<div id="dup" class="hidden"></div>
+
+<div class="steps">
+ <div class="glass"><b>01 — SELECT YOUR COUNTRY</b><p>Choose your country and automatically use the correct international calling code.</p></div>
+ <div class="glass"><b>02 — ADD YOUR DETAILS</b><p>Enter your name and WhatsApp number.</p></div>
+ <div class="glass"><b>03 — STAY CONNECTED</b><p>Register your contact and stay connected with our community.</p></div>
+</div>
+<a class="btn" href="https://whatsapp.com/channel/0029Vb9Iwzz1iUxTgb2Vps1S" target="_blank" rel="noopener">📢 JOIN OUR CHANNEL</a>
+<a class="btn gold" href="https://chat.whatsapp.com/Lol0Goj9qSmApSwgBdI72i" target="_blank" rel="noopener">👥 JOIN OUR GROUP</a>
+<a class="btn ghost" href="https://wa.me/254100853391" target="_blank" rel="noopener">🤖 NEED WHATSAPP BOT?</a>
+
+<div class="glass" style="margin-top:30px"><h3 style="color:var(--gold)">Your Privacy Matters</h3>
+<p class="sub">Your contact information is securely stored and is not publicly displayed.</p>
+<p style="font-size:.9rem;line-height:1.6;opacity:.8"><b>Collected:</b> your name, country and WhatsApp number.<br><b>Why:</b> to keep you connected with community updates.<br><b>Stored:</b> in a private, access-controlled database; only the administrator can view it.<br><b>Used:</b> for community communication only.<br><b>Removal:</b> message us on WhatsApp (button above) and we will delete your contact.</p></div>
+</div>
+<script type="module">
+import {db,toast} from "./firebase.js";
+import {ref,get,set,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import {parsePhoneNumberFromString,getCountries,getCountryCallingCode} from "https://esm.sh/libphonenumber-js@1.11.4/max";
+const $=id=>document.getElementById(id);
+const dn=new Intl.DisplayNames(["en"],{type:"region"});
+const flag=c=>[...c].map(x=>String.fromCodePoint(127397+x.charCodeAt())).join("");
+const countries=getCountries().map(c=>({c,name:dn.of(c),code:"+"+getCountryCallingCode(c)})).sort((a,b)=>a.name.localeCompare(b.name));
+let sel=null,last=0;
+function render(q=""){q=q.toLowerCase().replace("+","");
+ const r=countries.filter(x=>x.name.toLowerCase().includes(q)||x.code.slice(1).startsWith(q)).slice(0,60);
+ $("clist").innerHTML="";r.forEach(x=>{const d=document.createElement("div");d.textContent=`${flag(x.c)}  ${x.name}  ${x.code}`;
+  d.onclick=()=>{sel=x;$("cq").value=x.name;$("cc").value=`${flag(x.c)} ${x.code}`;$("clist").classList.add("hidden");$("num").focus()};$("clist").appendChild(d)});
+ $("clist").classList.toggle("hidden",!r.length)}
+$("cq").oninput=e=>{sel=null;$("cc").value="";render(e.target.value)};$("cq").onfocus=()=>render($("cq").value);
+(async()=>{
+ try{const s=(await get(ref(db,"settings/public"))).val()||{};
+  if(s.siteName)document.title=s.siteName;
+  if(s.maintenance){$("form").classList.add("hidden");$("off").classList.remove("hidden");$("offT").textContent="We're currently improving your experience.";$("offM").textContent="Please check back shortly."}
+  else if(s.registrationEnabled===false){$("form").classList.add("hidden");$("off").classList.remove("hidden");$("offT").textContent="Registration is currently unavailable.";$("offM").textContent="Contact registration is temporarily unavailable."}
+ }catch(e){}
+ $("loader").classList.add("hide");
+})();
+$("form").onsubmit=async e=>{e.preventDefault();
+ const name=$("name").value.replace(/[<>]/g,"").replace(/\s+/g," ").trim();
+ if(!name)return toast("Please enter your name.");
+ if(!sel)return toast("Please select your country.");
+ const p=parsePhoneNumberFromString($("num").value.replace(/[\s()\-.]/g,""),sel.c);
+ if(!p||!p.isValid())return toast("Please enter a valid WhatsApp number.");
+ if(Date.now()-last<8000)return toast("Please wait a moment before trying again.");
+ last=Date.now();
+ const phone=p.number.slice(1);
+ $("loader").querySelector("p").textContent="Securing your contact...";$("loader").classList.remove("hide");
+ try{
+  await set(ref(db,"contacts/"+phone),{name,phone,country:sel.name,countryCode:sel.code,createdAt:serverTimestamp(),status:"active"});
+  $("form").classList.add("hidden");$("done").classList.remove("hidden");
+  $("summary").innerHTML="";
+  [["Name",name],["Country",sel.name],["Number","+"+phone.slice(0,3)+" "+"•".repeat(Math.max(phone.length-5,3))+phone.slice(-2)]].forEach(([k,v])=>{const d=document.createElement("div");d.textContent=`${k}: ${v}`;$("summary").appendChild(d)});
+ }catch(err){
+  if(String(err.code||err.message).toUpperCase().includes("PERMISSION")){
+   toast("This WhatsApp number has already been registered.");
+   const d=$("dup");d.className="glass center";d.style.marginTop="14px";d.innerHTML="<b style='color:var(--gold)'>Already Registered</b><p class='sub'>This WhatsApp number has already been registered.</p>";
+   setTimeout(()=>d.className="hidden",5000);
+  }else toast("We couldn't save your contact right now. Please try again.");
+ }
+ $("loader").classList.add("hide");
+};
+$("ok").onclick=()=>location.reload();
+</script></body></html>
