@@ -1,0 +1,16 @@
+{
+  "rules": {
+    "contacts": {
+      ".read": "auth != null && auth.uid === 'REPLACE_WITH_ADMIN_UID'",
+      "$phone": {
+        ".write": "(auth != null && auth.uid === 'REPLACE_WITH_ADMIN_UID') || (!data.exists() && newData.exists())",
+        ".validate": "$phone.matches(/^[0-9]{6,15}$/) && newData.hasChildren(['name','phone','country','countryCode','createdAt','status']) && newData.child('phone').val() === $phone && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 80 && newData.child('country').isString() && newData.child('country').val().length <= 60 && newData.child('countryCode').val().matches(/^\\+[0-9]{1,4}$/) && newData.child('status').val() === 'active' && newData.child('createdAt').val() === now && !newData.child('name').val().matches(/[<>]/)"
+      }
+    },
+    "settings": {
+      "public": { ".read": true, ".write": "auth != null && auth.uid === 'REPLACE_WITH_ADMIN_UID'" },
+      "private": { ".read": "auth != null && auth.uid === 'REPLACE_WITH_ADMIN_UID'", ".write": "auth != null && auth.uid === 'REPLACE_WITH_ADMIN_UID'" }
+    },
+    "analytics": { ".read": "auth != null && auth.uid === 'REPLACE_WITH_ADMIN_UID'", ".write": "auth != null && auth.uid === 'REPLACE_WITH_ADMIN_UID'" }
+  }
+}
