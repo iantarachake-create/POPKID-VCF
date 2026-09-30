@@ -267,7 +267,7 @@ function initAdmin() {
   function rulesText(u) {
     const A = "auth != null && auth.uid === '" + u + "'", P = "$phone.matches(/^[0-9]{6,15}$/)";
     const rules = { rules: {
-      contacts: { ".read": A, "$phone": {
+      contacts: { ".read": A, ".indexOn": "createdAt", "$phone": {
         ".write": "(" + A + ") || (!data.exists() && newData.exists())",
         ".validate": P + " && newData.hasChildren(['name','phone','country','countryCode','createdAt','status']) && newData.child('phone').val() === $phone && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 80 && !newData.child('name').val().matches(/[<>]/) && newData.child('country').isString() && newData.child('country').val().length <= 60 && newData.child('countryCode').val().matches(/^[+][0-9]{1,4}$/) && newData.child('status').val() === 'active' && newData.child('createdAt').val() === now" } },
       lookup: { "$phone": { ".read": true, ".write": "(" + A + ") || (!data.exists() && newData.val() === true)", ".validate": P } },
@@ -289,7 +289,7 @@ function initAdmin() {
     try {
       const snap = await withTimeout(get(query(ref(db, "contacts"), orderByChild("createdAt"))), 20000);
       all = []; snap.forEach(s => { all.push({ key: s.key, ...s.val() }) }); all.reverse();
-    } catch (e) { toast("Could not load contacts. Publish the rules shown in the Setup tab."); console.error(e); try { localStorage.removeItem("dbUrl") } catch (_) {} alert("DEBUG - send this to Claude:\nError: " + (e.code || "") + " " + (e.message || e) + "\nDatabase: " + dbUrl + "\nUID: " + (auth.currentUser ? auth.currentUser.uid : "none") + "\nEmail: " + (auth.currentUser ? auth.currentUser.email : "none")); tab("u"); return }
+    } catch (e) { toast("Could not load contacts. Publish the rules shown in the Setup tab."); console.error(e); tab("u"); return }
     let s = {}, p = {};
     try { s = (await get(ref(db, "settings/public"))).val() || {}; p = (await get(ref(db, "settings/private"))).val() || {} } catch (e) {}
     target = s.target || 1000; $("st").value = target;
