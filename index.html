@@ -289,7 +289,7 @@ function initAdmin() {
     try {
       const snap = await withTimeout(get(query(ref(db, "contacts"), orderByChild("createdAt"))), 20000);
       all = []; snap.forEach(s => { all.push({ key: s.key, ...s.val() }) }); all.reverse();
-    } catch (e) { toast("Could not load contacts. Publish the rules shown in the Setup tab."); console.error(e); tab("u"); return }
+    } catch (e) { toast("Could not load contacts. Publish the rules shown in the Setup tab."); console.error(e); try { localStorage.removeItem("dbUrl") } catch (_) {} alert("DEBUG - send this to Claude:\nError: " + (e.code || "") + " " + (e.message || e) + "\nDatabase: " + dbUrl + "\nUID: " + (auth.currentUser ? auth.currentUser.uid : "none") + "\nEmail: " + (auth.currentUser ? auth.currentUser.email : "none")); tab("u"); return }
     let s = {}, p = {};
     try { s = (await get(ref(db, "settings/public"))).val() || {}; p = (await get(ref(db, "settings/private"))).val() || {} } catch (e) {}
     target = s.target || 1000; $("st").value = target;
